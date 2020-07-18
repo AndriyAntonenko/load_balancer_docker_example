@@ -1,0 +1,29 @@
+version: "3.3"
+
+services:
+  app:
+    image: request-store:latest
+    build:
+      context: .
+    depends_on:
+      - pg
+    ports:
+      - "127.0.0.1:3000:3000"
+    environment:
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+      - POSTGRES_DB
+      - POSTGRES_HOST
+      - POSTGRES_PORT
+    volumes:
+      - .:/app
+    command: sh -c './wait-for-it.sh pg:${POSTGRES_PORT} -- npm start'
+
+  pg:
+    image: postgres:9.6-alpine
+    environment:
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+      - POSTGRES_DB
+    volumes:
+      - ./sql/create_table.sql:/docker-entrypoint-initdb.d/create_table.sql
