@@ -5,10 +5,9 @@ services:
     image: request-store:latest
     build:
       context: .
+      dockerfile: app.Dockerfile
     depends_on:
       - pg
-    ports:
-      - "127.0.0.1:3000:3000"
     environment:
       - POSTGRES_USER
       - POSTGRES_PASSWORD
@@ -17,7 +16,7 @@ services:
       - POSTGRES_PORT
     volumes:
       - .:/app
-    command: sh -c './wait-for-it.sh pg:${POSTGRES_PORT} -- npm start'
+    command: sh -c './scripts/wait-for-it.sh pg:${POSTGRES_PORT} -- npm start'
 
   pg:
     image: postgres:9.6-alpine
@@ -27,3 +26,15 @@ services:
       - POSTGRES_DB
     volumes:
       - ./sql/create_table.sql:/docker-entrypoint-initdb.d/create_table.sql
+
+  lb:
+    image: nginx-loadbalancer:latest
+    build:
+      context: .
+      dockerfile: load_balancer.Dockerfile
+    environment:
+      - PROXY_UPSTREAM
+    depends_on:
+      - app
+    ports:
+      - "3000:80"
