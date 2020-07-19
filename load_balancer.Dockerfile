@@ -16,4 +16,5 @@ COPY ./scripts/start-nginx.sh /
 
 EXPOSE 80
 
-CMD ["/start-nginx.sh"]
+ENTRYPOINT ["/start-nginx.sh"]
+CMD ["nginx", "-g", "'daemon off;'"]
